@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}{% if saved_jobs_page %}Saved jobs{% elif recommendations %}Recommended jobs{% else %}Find jobs{% endif %} · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Job discovery</div>
+    <h1>{% if saved_jobs_page %}Saved jobs{% elif recommendations %}Recommended jobs{% else %}Find your next role{% endif %}</h1>
+    <p>{% if saved_jobs_page %}Your saved roles, ready when you are.{% elif recommendations %}Roles matched to your profile skills and location.{% else %}Search open roles by title, skill, company, or location.{% endif %}</p>
+  </div>
+  {% if saved_jobs_page %}<div class="page-heading-actions"><a class="btn btn-primary" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a></div>{% endif %}
+</header>
+
+{% if not saved_jobs_page and not recommendations %}
+<form class="search-panel" method="get" action="{{ url_for('jobs.jobs_list') }}">
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-5">
+      <label class="form-label" for="keyword">Job title, skill, or company</label>
+      <input id="keyword" class="form-control" name="keyword" value="{{ request.args.get('keyword', '') }}" placeholder="e.g. Product designer">
+    </div>
+    <div class="col-lg-4">
+      <label class="form-label" for="location">Location</label>
+      <input id="location" class="form-control" name="location" value="{{ request.args.get('location', '') }}" placeholder="City or remote">
+    </div>
+    <div class="col-lg-3 d-grid">
+      <button class="btn btn-primary" type="submit">Search jobs</button>
+    </div>
+  </div>
+  {% if request.args %}
+    <div class="mt-2"><a href="{{ url_for('jobs.jobs_list') }}">Clear all search filters</a></div>
+  {% endif %}
+  <div class="row g-3 mt-1">
+    <div class="col-sm-6 col-lg-3">
+      <label class="form-label" for="min_experience">Experience from (years)</label>
+      <input id="min_experience" class="form-control" type="number" min="0" name="min_experience" value="{{ request.args.get('min_experience', '') }}">
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <label class="form-label" for="max_experience">Experience to (years)</label>
+      <input id="max_experience" class="form-control" type="number" min="0" name="max_experience" value="{{ request.args.get('max_experience', '') }}">
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <label class="form-label" for="work_mode">Work mode</label>
+      <select class="form-select" id="work_mode" name="work_mode">
+        <option value="">Any work mode</option>
+        {% for mode in ['REMOTE', 'HYBRID', 'ONSITE'] %}<option value="{{ mode }}" {% if request.args.get('work_mode') == mode %}selected{% endif %}>{{ mode|title }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <label class="form-label" for="employment_type">Employment type</label>
+      <select class="form-select" id="employment_type" name="employment_type">
+        <option value="">Any type</option>
+        {% for kind in ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP'] %}<option value="{{ kind }}" {% if request.args.get('employment_type') == kind %}selected{% endif %}>{{ kind|replace('_', ' ')|title }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <details class="mt-3" {% if request.args.get('min_salary') or request.args.get('max_salary') or request.args.get('skills') or request.args.get('company') %}open{% endif %}>
+    <summary class="filter-toggle">More filters</summary>
+    <div class="row g-3 mt-1">
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="skills">Skills (comma-separated)</label>
+        <input id="skills" class="form-control" name="skills" value="{{ request.args.get('skills', '') }}" placeholder="Python, SQL">
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="company">Company</label>
+        <input id="company" class="form-control" name="company" value="{{ request.args.get('company', '') }}">
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="min_salary">Minimum salary</label>
+        <input id="min_salary" class="form-control" type="number" min="0" name="min_salary" value="{{ request.args.get('min_salary', '') }}">
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="max_salary">Maximum salary</label>
+        <input id="max_salary" class="form-control" type="number" min="0" name="max_salary" value="{{ request.args.get('max_salary', '') }}">
+      </div>
+      <div class="col-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-primary btn-sm" type="submit">Apply filters</button>
+        <a class="btn btn-quiet btn-sm" href="{{ url_for('jobs.jobs_list') }}">Clear filters</a>
+      </div>
+    </div>
+  </details>
+</form>
+{% endif %}
+
+{% set result_total = total if total is defined else jobs|length %}
+<div class="results-bar">
+  <p class="mb-0"><strong>{{ result_total }}</strong> {{ 'role' if result_total == 1 else 'roles' }}{% if request.args.get('keyword') or request.args.get('location') %} match your search{% endif %}</p>
+  {% if not saved_jobs_page and not recommendations %}
+  <label class="inline-form mb-0" for="sort">Sort
+    <select id="sort" class="form-select form-select-sm" onchange="this.form.submit()" form="sort-form">
+      <option value="recent" {% if sort == 'recent' or not sort %}selected{% endif %}>Most recent</option>
+      <option value="salary_high" {% if sort == 'salary_high' %}selected{% endif %}>Salary: high to low</option>
+      <option value="salary_low" {% if sort == 'salary_low' %}selected{% endif %}>Salary: low to high</option>
+    </select>
+  </label>
+  <form id="sort-form" method="get" action="{{ url_for('jobs.jobs_list') }}">
+    {% for key, value in request.args.items() if key != 'sort' and key != 'page' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+  </form>
+  {% endif %}
+</div>
+
+{% if search_error %}<div class="alert alert-danger" role="alert">{{ search_error }}</div>{% endif %}
+{% if jobs %}
+  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+    {% for job in jobs %}
+    <div class="col">
+      <article class="card job-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start w-100 gap-2">
+            <div>
+              <h2 class="job-title">{{ job.title }}</h2>
+              <p class="job-company">{{ job.company_name or 'Company' }}</p>
+            </div>
+            {% if job.match %}<span class="status-pill">{{ job.match.score }}% match</span>{% endif %}
+          </div>
+          <div class="job-meta">
+            <span>{{ job.location or 'Location not specified' }}</span>
+            <span>{{ job.work_mode|replace('_', ' ')|title }}</span>
+            <span>{{ job.employment_type|replace('_', ' ')|title }}</span>
+          </div>
+          {% if job.salary_min or job.salary_max %}
+            <p class="job-company">{{ job.salary_min or '—' }} – {{ job.salary_max or '—' }} salary</p>
+          {% endif %}
+          <ul class="skill-list">{% for skill in job.skills[:4] %}<li>{{ skill }}</li>{% endfor %}</ul>
+          <div class="job-card-actions">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('jobs.job_detail', job_id=job._id) }}">View details</a>
+            {% if session.get('role') == 'CANDIDATE' %}
+              <form method="post" action="{{ url_for('candidate.toggle_saved_job', job_id=job._id) }}">
+                <input type="hidden" name="next" value="{{ request.full_path if request.query_string else request.path }}">
+                <button class="btn btn-outline-primary btn-sm save-button" type="submit">
+                  {% if job._id in (saved_job_ids or []) %}Unsave{% else %}Save{% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    </div>
+    {% endfor %}
+  </div>
+  {% if page_count is defined and page_count > 1 %}
+  <nav class="mt-4" aria-label="Job search pages">
+    <ul class="pagination justify-content-center">
+      {% if previous_url %}<li class="page-item"><a class="page-link" href="{{ previous_url }}">Previous</a></li>{% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ page_count }}</span></li>
+      {% if next_url %}<li class="page-item"><a class="page-link" href="{{ next_url }}">Next</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+{% else %}
+  <div class="empty-state">
+    <h2>{% if saved_jobs_page %}No saved jobs yet{% else %}No jobs match your search{% endif %}</h2>
+    <p>{% if saved_jobs_page %}Save a role you like and return to it here.{% else %}Try changing your search or clearing filters to see more roles.{% endif %}</p>
+    {% if saved_jobs_page %}
+      <a class="btn btn-primary" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a>
+    {% else %}
+      <a class="btn btn-outline-primary" href="{{ url_for('jobs.jobs_list') }}">Clear filters</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

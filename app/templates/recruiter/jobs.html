@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}My jobs · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Recruiter workspace</div><h1>My jobs</h1><p>Manage your published roles and their visibility.</p></div>
+  <div class="page-heading-actions"><a href="{{ url_for('recruiter.new_job') }}" class="btn btn-primary">Post a job</a></div>
+</header>
+{% if jobs %}
+<div class="card px-3 px-md-4">
+  {% for job in jobs %}
+  <div class="application-row">
+    <div class="application-primary">
+      <strong>{{ job.title }}</strong>
+      <span>{{ job.company_name or 'Company profile needed' }} · {{ job.location }} · {{ job.work_mode|title }}</span>
+    </div>
+    <span class="status-pill status-{{ job.status|lower }}">{{ job.status|title }}</span>
+    <div class="d-flex align-items-center gap-2">
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('jobs.job_detail', job_id=job._id) }}">View</a>
+      <form method="post" action="{{ url_for('recruiter.update_job_status', job_id=job._id) }}" data-confirm="{{ 'Close' if job.status == 'OPEN' else 'Reopen' }} this job listing?">
+      <input type="hidden" name="status" value="{{ 'CLOSED' if job.status == 'OPEN' else 'OPEN' }}">
+      <button class="btn btn-quiet btn-sm" type="submit">{{ 'Close' if job.status == 'OPEN' else 'Reopen' }}</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><h2>No jobs posted yet</h2><p>Create a listing to start meeting candidates.</p><a class="btn btn-primary" href="{{ url_for('recruiter.new_job') }}">Post your first job</a></div>
+{% endif %}
+{% endblock %}

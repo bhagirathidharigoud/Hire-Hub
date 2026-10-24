@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>My profile</h2>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+<form method="post" class="card card-body mt-3">
+  <div class="mb-3">
+    <label class="form-label" for="name">Full name</label>
+    <input id="name" class="form-control" name="name" value="{{ user.name }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="email">Email</label>
+    <input id="email" class="form-control" value="{{ user.email }}" disabled>
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="phone">Phone</label>
+    <input id="phone" class="form-control" name="phone" value="{{ user.phone or '' }}">
+  </div>
+  {% if user.role == 'CANDIDATE' %}
+    <div class="mb-3">
+      <label class="form-label" for="location">Location</label>
+      <input id="location" class="form-control" name="location" value="{{ user.location or '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="skills">Skills, comma-separated</label>
+      <input id="skills" class="form-control" name="skills" value="{{ user.skills|join(', ') if user.skills else '' }}">
+    </div>
+  {% endif %}
+  <button class="btn btn-primary align-self-start" type="submit">Save profile</button>
+</form>
+{% endblock %}

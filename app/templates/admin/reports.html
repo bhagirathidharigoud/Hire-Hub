@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Reports · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Administration</div><h1>Reports</h1><p>Review key platform totals and export the current snapshot.</p></div>
+  <div class="page-heading-actions"><a href="{{ url_for('admin.export_report') }}" class="btn btn-primary">Download CSV</a></div>
+</header>
+<div class="metric-grid">
+  <article class="metric-card"><p class="metric-label">Total users</p><p class="metric-value">{{ stats.total_users }}</p></article>
+  <article class="metric-card"><p class="metric-label">Active users</p><p class="metric-value">{{ stats.active_users }}</p></article>
+  <article class="metric-card"><p class="metric-label">Open jobs</p><p class="metric-value">{{ stats.open_jobs }}</p></article>
+  <article class="metric-card"><p class="metric-label">Applications</p><p class="metric-value">{{ stats.total_applications }}</p></article>
+</div>
+<div class="row g-4 mt-2">
+  <div class="col-md-6">
+    <div class="card card-body h-100"><h2 class="h5">Applications by status</h2>
+      {% for status, count in application_statuses.items() %}
+      <div class="d-flex justify-content-between border-bottom py-2"><span>{{ status|replace('_', ' ')|title }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p class="text-muted">No applications recorded.</p>{% endfor %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card card-body h-100"><h2 class="h5">Jobs by work mode</h2>
+      {% for mode, count in job_modes.items() %}
+      <div class="d-flex justify-content-between border-bottom py-2"><span>{{ mode|replace('_', ' ')|title }}</span><strong>{{ count }}</strong></div>
+      {% else %}<p class="text-muted">No job listings recorded.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

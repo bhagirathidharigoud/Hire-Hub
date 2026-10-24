@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Manage jobs · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Administration</div><h1>Jobs</h1><p>Review listings and manage publication status.</p></div></header>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if jobs %}
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Location</th>
+        <th>Company</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td>{{ job.title }}</td>
+        <td>{{ job.location }}</td>
+        <td>{{ job.company_name or 'Company' }}</td>
+        <td><span class="status-pill status-{{ job.status|lower }}">{{ job.status|title }}</span></td>
+        <td>
+          <form method="post" class="d-inline">
+            <input type="hidden" name="job_id" value="{{ job._id }}">
+            <input type="hidden" name="action" value="toggle_status">
+            <button type="submit" class="btn btn-sm btn-outline-primary">{{ 'Close' if job.status == 'OPEN' else 'Reopen' }}</button>
+          </form>
+          <form method="post" class="d-inline ms-2" data-confirm="Delete this job permanently? Its applications and history may no longer be accessible.">
+            <input type="hidden" name="job_id" value="{{ job._id }}">
+            <input type="hidden" name="action" value="delete">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info mt-3">No jobs found.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Applications · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Administration</div><h1>Applications</h1><p>Platform-wide application overview.</p></div></header>
+{% if applications %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Candidate</th>
+        <th>Job</th>
+        <th>Status</th>
+        <th>Applied</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr>
+        <td>{{ app.candidate.name if app.candidate else 'Candidate' }}</td>
+        <td>{{ app.job.title if app.job else 'Job removed' }}</td>
+        <td><span class="status-pill status-{{ app.status|lower|replace('_', '-') }}">{{ app.status|replace('_', ' ')|title }}</span></td>
+        <td>{{ app.applied_at[:10] if app.applied_at else '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info mt-3">No applications found.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Companies · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Administration</div>
+    <h1>Companies</h1>
+    <p>Companies are grouped from recruiter profiles and their job listings.</p>
+  </div>
+</header>
+{% if companies %}
+  <div class="card px-3 px-md-4">
+    {% for company in companies %}
+    <div class="application-row">
+      <div class="application-primary">
+        <strong>{{ company.name }}</strong>
+        <span>Recruiter: {{ company.recruiter.name if company.recruiter else 'Not available' }}</span>
+      </div>
+      <span class="application-date">{{ company.open_jobs }} open · {{ company.jobs }} total jobs</span>
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin.jobs') }}">View jobs</a>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <h2>No companies yet</h2>
+    <p>Company records will appear when recruiters add a company profile and publish a job.</p>
+  </div>
+{% endif %}
+{% endblock %}

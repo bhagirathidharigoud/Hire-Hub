@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Company profile · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Recruiter workspace</div>
+    <h1>Company profile</h1>
+    <p>Keep company details ready for your job listings.</p>
+  </div>
+</header>
+<form method="post" class="card card-body">
+  {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+  <div class="form-section">
+    <h2 class="form-section-title">Company information</h2>
+    <div class="mb-3">
+      <label class="form-label" for="name">Company name <span class="text-muted">(required)</span></label>
+      <input id="name" class="form-control" name="name" value="{{ company.name or '' }}" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="website">Website</label>
+      <input id="website" class="form-control" name="website" type="url" placeholder="https://example.com" value="{{ company.website or '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="location">Location</label>
+      <input id="location" class="form-control" name="location" value="{{ company.location or '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="description">About the company</label>
+      <textarea id="description" class="form-control" name="description" rows="4">{{ company.description or '' }}</textarea>
+    </div>
+  </div>
+  <button class="btn btn-primary align-self-start mt-3" type="submit">Save company profile</button>
+</form>
+{% endblock %}

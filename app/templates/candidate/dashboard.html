@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Your dashboard · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Candidate workspace</div>
+    <h1>Welcome back, {{ user.name.split(' ')[0] if user.name else 'there' }}</h1>
+    <p>Keep your search moving. Find a role that fits your skills and goals.</p>
+  </div>
+  <div class="page-heading-actions">
+    <a class="btn btn-primary" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a>
+  </div>
+</header>
+
+<section aria-label="Application overview">
+  <div class="metric-grid">
+    <article class="metric-card"><p class="metric-label">Applications</p><p class="metric-value">{{ applications|length }}</p></article>
+    <article class="metric-card"><p class="metric-label">Shortlisted</p><p class="metric-value">{{ application_counts.shortlisted }}</p></article>
+    <article class="metric-card"><p class="metric-label">Interviews</p><p class="metric-value">{{ application_counts.interviews }}</p></article>
+    <article class="metric-card"><p class="metric-label">Selections</p><p class="metric-value">{{ application_counts.selections }}</p></article>
+  </div>
+</section>
+
+{% if not user.skills or not user.location %}
+  <aside class="alert alert-primary d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+    <span><strong>Improve your matches.</strong> Add your skills and location to your profile.</span>
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('candidate.profile') }}">Complete profile</a>
+  </aside>
+{% endif %}
+
+<section aria-labelledby="recommended-heading">
+  <div class="section-heading">
+    <h2 id="recommended-heading">Recommended for you</h2>
+    <a href="{{ url_for('candidate.recommendations') }}">View all</a>
+  </div>
+  {% if jobs %}
+    <div class="row row-cols-1 row-cols-lg-3 g-3">
+      {% for job in jobs[:3] %}
+      <div class="col">
+        <article class="card job-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start w-100 gap-2">
+              <div>
+                <h3 class="job-title">{{ job.title }}</h3>
+                <p class="job-company">{{ job.company_name or 'Company' }}</p>
+              </div>
+              <span class="status-pill">{{ job.match.score }}% match</span>
+            </div>
+            <div class="job-meta"><span>{{ job.location or 'Location not specified' }}</span><span>{{ job.work_mode|replace('_', ' ')|title }}</span></div>
+            <ul class="skill-list">{% for skill in job.match.matched_skills[:4] %}<li>{{ skill }}</li>{% endfor %}</ul>
+            <div class="job-card-actions">
+              <a class="btn btn-primary btn-sm" href="{{ url_for('jobs.job_detail', job_id=job._id) }}">View details</a>
+              <form method="post" action="{{ url_for('candidate.toggle_saved_job', job_id=job._id) }}">
+                <input type="hidden" name="next" value="{{ url_for('candidate.dashboard') }}">
+                <button class="btn btn-outline-primary btn-sm save-button" type="submit" aria-label="Save {{ job.title }}">Save</button>
+              </form>
+            </div>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>Build your profile to get recommendations</h3>
+      <p>Add a few skills and a location. We’ll use them to surface relevant open roles.</p>
+      <a class="btn btn-primary" href="{{ url_for('candidate.profile') }}">Update profile</a>
+    </div>
+  {% endif %}
+</section>
+
+<div class="row g-4 mt-1">
+  <section class="col-lg-7" aria-labelledby="activity-heading">
+    <div class="section-heading"><h2 id="activity-heading">Recent applications</h2><a href="{{ url_for('candidate.applications') }}">View all</a></div>
+    {% if recent_applications %}
+      <div class="card px-3 px-md-4">
+        {% for application in recent_applications %}
+          <div class="application-row">
+            <div class="application-primary"><strong>{{ application.job.title if application.job else 'Job no longer available' }}</strong><span>{{ application.job.company_name if application.job else '' }}</span></div>
+            <span class="status-pill status-{{ application.status|lower|replace('_', '-') }}">{{ application.status|replace('_', ' ')|title }}</span>
+            <span class="application-date">{{ application.applied_at[:10] if application.applied_at else '' }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><h3>Your applications will appear here</h3><p>Find a job that fits and submit your first application.</p><a class="btn btn-primary btn-sm" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a></div>
+    {% endif %}
+  </section>
+  <section class="col-lg-5" aria-labelledby="interviews-heading">
+    <div class="section-heading"><h2 id="interviews-heading">Upcoming interviews</h2><a href="{{ url_for('candidate.interviews') }}">View all</a></div>
+    {% if upcoming_interviews %}
+      <div class="card card-body">
+        {% for interview in upcoming_interviews %}
+          <div class="activity-item">
+            <p><strong>{{ interview.date }} · {{ interview.time }}</strong></p>
+            <small>{{ interview.type|replace('_', ' ')|title }} interview</small>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><p>No upcoming interviews. We’ll show scheduled interviews here.</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

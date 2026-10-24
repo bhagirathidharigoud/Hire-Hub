@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Audit logs · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Administration</div><h1>Audit logs</h1><p>Recent account, listing, and application activity.</p></div></header>
+
+{% if logs %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Event</th>
+        <th>Message</th>
+        <th>Actor</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.created_at }}</td>
+        <td><span class="status-pill">{{ log.event_type }}</span></td>
+        <td>{{ log.message }}</td>
+        <td>{{ log.actor_role or 'SYSTEM' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info mt-3">No audit logs yet.</div>
+{% endif %}
+{% endblock %}

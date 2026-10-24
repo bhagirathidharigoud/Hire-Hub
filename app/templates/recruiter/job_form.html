@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Post a job · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Recruiter workspace</div><h1>Post a job</h1><p>Share the essentials. You can manage applications after publishing.</p></div>
+</header>
+<form method="post" class="card card-body">
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  <div class="form-section">
+    <h2 class="form-section-title">1. Job information</h2>
+    <div class="mb-3"><label class="form-label" for="title">Job title <span class="text-muted">(required)</span></label><input id="title" class="form-control" name="title" value="{{ form.title if form else '' }}" required></div>
+    <div class="mb-3"><label class="form-label" for="description">What will this person do? <span class="text-muted">(required)</span></label><textarea id="description" class="form-control" name="description" rows="5" required>{{ form.description if form else '' }}</textarea></div>
+    {% if not recruiter_has_company %}
+    <p class="alert alert-light mb-0">Add your company details first to show your organization on this listing. <a href="{{ url_for('recruiter.company_profile') }}">Set up company profile</a></p>
+    {% endif %}
+  </div>
+  <div class="form-section">
+    <h2 class="form-section-title">2. Skills and experience</h2>
+    <div class="mb-3"><label class="form-label" for="skills">Key skills</label><input id="skills" class="form-control" name="skills" value="{{ form.skills if form else '' }}" placeholder="Python, customer success"><div class="form-text">Separate skills with commas.</div></div>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="experience_min">Minimum experience (years)</label><input id="experience_min" class="form-control" type="number" min="0" name="experience_min" value="{{ form.experience_min if form else '0' }}"></div>
+      <div class="col-md-6"><label class="form-label" for="experience_max">Maximum experience (years)</label><input id="experience_max" class="form-control" type="number" min="0" name="experience_max" value="{{ form.experience_max if form else '0' }}"></div>
+    </div>
+  </div>
+  <div class="form-section">
+    <h2 class="form-section-title">3. Salary and work arrangements</h2>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="location">Location</label><input id="location" class="form-control" name="location" value="{{ form.location if form else '' }}" placeholder="City or Remote"></div>
+      <div class="col-md-6"><label class="form-label" for="work_mode">Work mode</label><select id="work_mode" class="form-select" name="work_mode">{% for mode in ['REMOTE', 'HYBRID', 'ONSITE'] %}<option value="{{ mode }}" {% if form and form.work_mode == mode %}selected{% endif %}>{{ mode|title }}</option>{% endfor %}</select></div>
+      <div class="col-md-6"><label class="form-label" for="employment_type">Employment type</label><select id="employment_type" class="form-select" name="employment_type">{% for kind in ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP'] %}<option value="{{ kind }}" {% if form and form.employment_type == kind %}selected{% endif %}>{{ kind|replace('_', ' ')|title }}</option>{% endfor %}</select></div>
+      <div class="col-md-3"><label class="form-label" for="salary_min">Minimum salary</label><input id="salary_min" class="form-control" type="number" min="0" name="salary_min" value="{{ form.salary_min if form else '0' }}"></div>
+      <div class="col-md-3"><label class="form-label" for="salary_max">Maximum salary</label><input id="salary_max" class="form-control" type="number" min="0" name="salary_max" value="{{ form.salary_max if form else '0' }}"></div>
+    </div>
+  </div>
+  <div class="form-section">
+    <h2 class="form-section-title">4. Deadline and publishing</h2>
+    <div class="mb-3"><label class="form-label" for="deadline">Application deadline</label><input id="deadline" class="form-control" type="date" name="deadline" value="{{ form.deadline if form else '' }}"></div>
+    <p class="form-text mb-0">Your job will be published as open after you submit.</p>
+  </div>
+  <div class="mt-3 d-flex flex-wrap gap-2">
+    <button class="btn btn-primary" type="submit">Publish job</button>
+    <a class="btn btn-quiet" href="{{ url_for('recruiter.dashboard') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

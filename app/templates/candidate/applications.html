@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}My applications · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Candidate workspace</div><h1>My applications</h1><p>Follow each application and see the latest status.</p></div>
+  <div class="page-heading-actions"><a class="btn btn-primary" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a></div>
+</header>
+{% if applications %}
+<div class="card px-3 px-md-4">
+  {% for app in applications %}
+  <div class="application-row">
+    <div class="application-primary"><strong>{{ app.job.title if app.job else 'Job no longer available' }}</strong><span>{{ app.job.company_name if app.job else '' }}</span></div>
+    <span class="status-pill status-{{ app.status|lower|replace('_', '-') }}">{{ app.status|replace('_', ' ')|title }}</span>
+    {% if app.status in ['APPLIED', 'UNDER_REVIEW', 'SHORTLISTED'] %}
+      <form method="post" action="{{ url_for('candidate.withdraw_application', application_id=app._id) }}" data-confirm="Withdraw this application? The employer will be notified of the updated status.">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">Withdraw</button>
+      </form>
+    {% else %}<span class="application-date">{{ app.applied_at[:10] if app.applied_at else '' }}</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><h2>No applications yet</h2><p>When you apply for a role, you’ll be able to follow its progress here.</p><a class="btn btn-primary" href="{{ url_for('jobs.jobs_list') }}">Find jobs</a></div>
+{% endif %}
+{% endblock %}

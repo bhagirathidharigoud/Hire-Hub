@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Manage users · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Administration</div><h1>Users</h1><p>Manage roles and account access.</p></div></header>
+{% if users %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}          <form id="user-{{ user._id }}" method="post" data-confirm="Save access and role changes for {{ user.name }}?"><input type="hidden" name="user_id" value="{{ user._id }}"></form></td>
+          <td>
+            <select class="form-select form-select-sm" name="role" form="user-{{ user._id }}">
+              <option value="CANDIDATE" {% if user.role == 'CANDIDATE' %}selected{% endif %}>Candidate</option>
+              <option value="RECRUITER" {% if user.role == 'RECRUITER' %}selected{% endif %}>Recruiter</option>
+              <option value="ADMIN" {% if user.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+            </select>
+          </td>
+          <td>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="is_active" form="user-{{ user._id }}" {% if user.is_active %}checked{% endif %}>
+              <label class="form-check-label">Active</label>
+            </div>
+          </td>
+          <td><button class="btn btn-sm btn-primary" type="submit" form="user-{{ user._id }}">Save</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info mt-3">No users found.</div>
+{% endif %}
+{% endblock %}

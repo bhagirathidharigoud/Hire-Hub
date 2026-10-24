@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Admin dashboard · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Administration</div>
+    <h1>Platform overview</h1>
+    <p>Review platform activity and take care of items that need attention.</p>
+  </div>
+  <div class="page-heading-actions">
+    {% if pending_applications %}
+      <a class="btn btn-primary" href="{{ url_for('admin.applications') }}">Review applications</a>
+    {% else %}
+      <a class="btn btn-primary" href="{{ url_for('admin.users') }}">Manage users</a>
+    {% endif %}
+  </div>
+</header>
+
+<section aria-label="Platform totals">
+  <div class="metric-grid">
+    <article class="metric-card"><p class="metric-label">Users</p><p class="metric-value">{{ users|length }}</p></article>
+    <article class="metric-card"><p class="metric-label">Open jobs</p><p class="metric-value">{{ jobs|selectattr('status', 'equalto', 'OPEN')|list|length }}</p></article>
+    <article class="metric-card"><p class="metric-label">Companies</p><p class="metric-value">{{ company_count }}</p></article>
+    <article class="metric-card"><p class="metric-label">Applications to review</p><p class="metric-value">{{ pending_applications }}</p></article>
+  </div>
+</section>
+
+<div class="row g-4">
+  <section class="col-lg-7" aria-labelledby="activity-heading">
+    <div class="section-heading"><h2 id="activity-heading">Recent activity</h2><a href="{{ url_for('admin.audit_logs') }}">View audit logs</a></div>
+    {% if logs %}
+      <div class="card card-body activity-list">
+        {% for log in logs %}
+          <div class="activity-item">
+            <p>{{ log.message }}</p>
+            <small>{{ log.actor.name if log.actor else (log.actor_role|title if log.actor_role else 'System') }} · {{ log.created_at[:16] if log.created_at else '' }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><p>Platform activity will appear here.</p></div>
+    {% endif %}
+  </section>
+  <section class="col-lg-5" aria-labelledby="admin-tools-heading">
+    <div class="section-heading"><h2 id="admin-tools-heading">Management</h2></div>
+    <div class="card card-body">
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-primary text-start" href="{{ url_for('admin.users') }}">Manage users <span class="float-end">{{ users|length }}</span></a>
+        <a class="btn btn-outline-primary text-start" href="{{ url_for('admin.companies') }}">Review companies <span class="float-end">{{ company_count }}</span></a>
+        <a class="btn btn-outline-primary text-start" href="{{ url_for('admin.jobs') }}">Manage jobs <span class="float-end">{{ jobs|length }}</span></a>
+        <a class="btn btn-outline-primary text-start" href="{{ url_for('admin.reports') }}">Open reports</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

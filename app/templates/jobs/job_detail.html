@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ job.title }} · HireHub{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('jobs.jobs_list') }}">← Back to jobs</a></p>
+<article class="card card-body">
+  <header class="page-heading mb-3">
+    <div>
+      <div class="eyebrow">{{ job.company_name or 'Company' }}</div>
+      <h1>{{ job.title }}</h1>
+      <div class="job-meta mt-2">
+        <span>{{ job.location or 'Location not specified' }}</span>
+        <span>{{ job.work_mode|replace('_', ' ')|title }}</span>
+        <span>{{ job.employment_type|replace('_', ' ')|title }}</span>
+      </div>
+    </div>
+    {% if job.status == 'OPEN' and session.get('role') == 'CANDIDATE' %}
+      <form method="post" action="{{ url_for('jobs.apply', job_id=job._id) }}">
+        <button class="btn btn-primary" type="submit">Apply now</button>
+      </form>
+    {% elif job.status == 'OPEN' and not session.get('user_id') %}
+      <a class="btn btn-primary" href="{{ url_for('auth.login', next=request.path) }}">Sign in to apply</a>
+    {% endif %}
+  </header>
+  {% if job.salary_min or job.salary_max %}
+    <p><strong>Salary range:</strong> {{ job.salary_min or 'Not specified' }} – {{ job.salary_max or 'Not specified' }}</p>
+  {% endif %}
+  <section class="form-section mb-3">
+    <h2 class="form-section-title">About the role</h2>
+    <p class="mb-0">{{ job.description }}</p>
+  </section>
+  {% if job.skills %}
+  <section class="form-section mb-3">
+    <h2 class="form-section-title">Skills</h2>
+    <ul class="skill-list mb-0">{% for skill in job.skills %}<li>{{ skill }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+  {% if job.experience_min or job.experience_max %}
+    <p><strong>Experience:</strong> {{ job.experience_min or 0 }}{% if job.experience_max %}–{{ job.experience_max }}{% else %}+{% endif %} years</p>
+  {% endif %}
+  {% if job.status != 'OPEN' %}<p class="text-muted mb-0">This position is no longer accepting applications.</p>{% endif %}
+</article>
+{% endblock %}

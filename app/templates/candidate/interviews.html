@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}My interviews · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Candidate workspace</div><h1>My interviews</h1><p>Review the date, time, and details for your scheduled interviews.</p></div></header>
+{% if interviews %}
+  <div class="list-group mt-3">
+    {% for interview in interviews %}
+    <div class="list-group-item">
+      <h5>{{ interview.job.title if interview.job else 'Interview' }}</h5>
+      <p class="mb-1">{{ interview.date }} at {{ interview.time }} · {{ interview.type|replace('_', ' ')|title }}</p>
+      {% if interview.meeting_link %}<p class="mb-1">Details: {{ interview.meeting_link }}</p>{% endif %}
+      <span class="badge text-bg-secondary">{{ interview.status|title }}</span>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info mt-3">No interviews are scheduled for you.</div>
+{% endif %}
+{% endblock %}

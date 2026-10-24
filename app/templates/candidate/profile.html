@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}My profile · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Candidate workspace</div><h1>My profile</h1><p>Help employers and recommendations understand what you’re looking for.</p></div>
+  <div class="page-heading-actions"><a class="btn btn-outline-primary" href="{{ url_for('candidate.resume') }}">Manage resume</a></div>
+</header>
+<form method="post" class="card card-body">
+  <div class="form-section">
+    <h2 class="form-section-title">Personal details</h2>
+    <div class="mb-3"><label class="form-label" for="name">Full name <span class="text-muted">(required)</span></label><input id="name" class="form-control" name="name" value="{{ user.name }}" required></div>
+    <div class="mb-3"><label class="form-label" for="email">Email</label><input id="email" class="form-control" value="{{ user.email }}" disabled></div>
+    <div class="mb-3"><label class="form-label" for="phone">Phone</label><input id="phone" class="form-control" name="phone" type="tel" value="{{ user.phone or '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="location">Location</label><input id="location" class="form-control" name="location" value="{{ user.location or '' }}" placeholder="City, country or Remote"></div>
+    <div class="mb-3"><label class="form-label" for="skills">Skills</label><input id="skills" class="form-control" name="skills" value="{{ user.skills|join(', ') if user.skills else '' }}" placeholder="Python, project management"></div>
+  </div>
+  <button class="btn btn-primary align-self-start mt-3" type="submit">Save profile</button>
+</form>
+{% endblock %}

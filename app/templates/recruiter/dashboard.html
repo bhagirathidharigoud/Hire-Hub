@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Recruiter dashboard · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <div class="eyebrow">Recruiter workspace</div>
+    <h1>Hiring overview</h1>
+    <p>Review your pipeline and move promising candidates forward.</p>
+  </div>
+  <div class="page-heading-actions">
+    <a class="btn btn-primary" href="{{ url_for('recruiter.new_job') }}">Post a job</a>
+  </div>
+</header>
+
+<section aria-label="Recruitment overview">
+  <div class="metric-grid">
+    <article class="metric-card"><p class="metric-label">Active jobs</p><p class="metric-value">{{ metrics.active_jobs }}</p></article>
+    <article class="metric-card"><p class="metric-label">Applications</p><p class="metric-value">{{ metrics.applications }}</p></article>
+    <article class="metric-card"><p class="metric-label">Shortlisted</p><p class="metric-value">{{ metrics.shortlisted }}</p></article>
+    <article class="metric-card"><p class="metric-label">Upcoming interviews</p><p class="metric-value">{{ metrics.upcoming_interviews }}</p></article>
+  </div>
+</section>
+
+<section aria-labelledby="recent-applications-heading">
+  <div class="section-heading">
+    <h2 id="recent-applications-heading">Recent applications</h2>
+    <a href="{{ url_for('recruiter.applicants') }}">View all applicants</a>
+  </div>
+  {% if recent_applications %}
+    <div class="card px-3 px-md-4">
+      {% for application in recent_applications %}
+        <div class="application-row">
+          <div class="application-primary">
+            <strong>{{ application.candidate.name if application.candidate else 'Candidate' }}</strong>
+            <span>{{ application.job.title if application.job else 'Job listing' }}</span>
+          </div>
+          <span class="status-pill status-{{ application.status|lower|replace('_', '-') }}">{{ application.status|replace('_', ' ')|title }}</span>
+          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('recruiter.applicants') }}">Review</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>Your applicant list is ready</h3>
+      <p>Post a job to start receiving applications from candidates.</p>
+      <a class="btn btn-primary" href="{{ url_for('recruiter.new_job') }}">Post your first job</a>
+    </div>
+  {% endif %}
+</section>
+
+{% if interviews %}
+<section aria-labelledby="upcoming-interviews-heading">
+  <div class="section-heading"><h2 id="upcoming-interviews-heading">Upcoming interviews</h2><a href="{{ url_for('recruiter.interviews') }}">View schedule</a></div>
+  <div class="card px-3 px-md-4">
+    {% for interview in interviews %}
+      <div class="application-row">
+        <div class="application-primary"><strong>{{ interview.date }} · {{ interview.time }}</strong><span>{{ interview.type|replace('_', ' ')|title }}</span></div>
+        <span class="status-pill status-interview-scheduled">Scheduled</span>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('recruiter.interviews') }}">Details</a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Applicants · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><div class="eyebrow">Recruiter workspace</div><h1>Applicants</h1><p>Review candidates and move each application to its next step.</p></div>
+  <div class="page-heading-actions"><a class="btn btn-outline-primary" href="{{ url_for('recruiter.jobs') }}">Manage jobs</a></div>
+</header>
+{% if applications %}
+  <div class="card px-3 px-md-4">
+    {% for application in applications %}
+    <article class="application-row align-items-start">
+      <div class="application-primary">
+        <strong>{{ application.candidate.name if application.candidate else 'Candidate' }}</strong>
+        <span>{{ application.job.title }} · {{ application.candidate.email if application.candidate else '' }}</span>
+        {% if application.candidate and application.candidate.skills %}<span>Skills: {{ application.candidate.skills|join(', ') }}</span>{% endif %}
+      </div>
+      <div>
+        <span class="status-pill status-{{ application.status|lower|replace('_', '-') }}">{{ application.status|replace('_', ' ')|title }}</span>
+        <small class="application-date d-block mt-1">Applied {{ application.applied_at[:10] if application.applied_at else '' }}</small>
+      </div>
+      <details class="applicant-actions">
+        <summary class="btn btn-outline-primary btn-sm">Manage</summary>
+        <div class="applicant-action-panel">
+          <form method="post" action="{{ url_for('recruiter.update_application_status', application_id=application._id) }}">
+            <label class="form-label" for="status-{{ application._id }}">Next status</label>
+            <select id="status-{{ application._id }}" name="status" class="form-select form-select-sm">
+              {% if application.status == 'APPLIED' %}<option value="UNDER_REVIEW">Under review</option>{% endif %}
+              {% if application.status in ['APPLIED', 'UNDER_REVIEW'] %}<option value="SHORTLISTED">Shortlisted</option>{% endif %}
+              {% if application.status in ['APPLIED', 'UNDER_REVIEW', 'SHORTLISTED'] %}<option value="REJECTED">Rejected</option>{% endif %}
+              {% if application.status in ['APPLIED', 'UNDER_REVIEW', 'SHORTLISTED', 'INTERVIEW_SCHEDULED'] %}<option value="SELECTED">Selected</option><option value="REJECTED">Rejected</option>{% endif %}
+            </select>
+            <button class="btn btn-primary btn-sm mt-2" type="submit">Save status</button>
+          </form>
+          {% if application.status in ['APPLIED', 'UNDER_REVIEW', 'SHORTLISTED'] %}
+          <details class="mt-3">
+            <summary>Schedule interview</summary>
+            <form method="post" action="{{ url_for('recruiter.schedule_interview', application_id=application._id) }}" class="mt-2">
+              <label class="form-label" for="date-{{ application._id }}">Date</label><input id="date-{{ application._id }}" type="date" name="date" class="form-control form-control-sm" required>
+              <label class="form-label mt-2" for="time-{{ application._id }}">Time</label><input id="time-{{ application._id }}" type="time" name="time" class="form-control form-control-sm" required>
+              <label class="form-label mt-2" for="type-{{ application._id }}">Interview type</label>
+              <select id="type-{{ application._id }}" name="type" class="form-select form-select-sm"><option value="ONLINE">Online</option><option value="IN_PERSON">In person</option><option value="PHONE">Phone</option></select>
+              <label class="form-label mt-2" for="meeting-{{ application._id }}">Meeting details</label><input id="meeting-{{ application._id }}" name="meeting_link" class="form-control form-control-sm">
+              <button class="btn btn-primary btn-sm mt-2" type="submit">Schedule</button>
+            </form>
+          </details>
+          {% endif %}
+        </div>
+      </details>
+    </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info mt-3">No applicants for your jobs yet.</div>
+{% endif %}
+{% endblock %}

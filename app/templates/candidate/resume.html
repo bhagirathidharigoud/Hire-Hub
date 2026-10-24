@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}My resume · HireHub{% endblock %}
+{% block content %}
+<header class="page-heading"><div><div class="eyebrow">Candidate workspace</div><h1>My resume</h1><p>Upload a current resume so recruiters can review your experience.</p></div></header>
+<div class="card card-body">
+  {% if resume %}
+    <p>Current resume: <strong>{{ resume.original_name }}</strong></p>
+    <a class="btn btn-outline-secondary mb-3" href="{{ url_for('candidate.download_resume') }}">Download current resume</a>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label class="form-label" for="resume">Resume file</label>
+      <input id="resume" type="file" name="resume" accept=".pdf,.doc,.docx" class="form-control" required>
+      <div class="form-text">PDF, DOC, or DOCX · Maximum 5 MB</div>
+    </div>
+    <button class="btn btn-primary" type="submit">Upload Resume</button>
+  </form>
+</div>
+{% endblock %}

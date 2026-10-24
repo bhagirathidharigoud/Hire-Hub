@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}HireHub · Find work that fits{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">Your next step starts here</div>
+  <h1>Work that fits.<br>Hiring made clear.</h1>
+  <p>Explore relevant opportunities or find the people who will move your team forward.</p>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('jobs.jobs_list') }}" class="btn btn-primary">Find a job</a>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">Create an account</a>
+  </div>
+</section>
+<form class="public-search" method="get" action="{{ url_for('jobs.jobs_list') }}">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-5"><label class="form-label" for="home-keyword">Job title, skill, or company</label><input id="home-keyword" class="form-control" name="keyword" placeholder="e.g. Data analyst"></div>
+    <div class="col-md-5"><label class="form-label" for="home-location">Location</label><input id="home-location" class="form-control" name="location" placeholder="City or remote"></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit">Search jobs</button></div>
+  </div>
+</form>
+{% endblock %}
