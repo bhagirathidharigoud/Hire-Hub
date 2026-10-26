@@ -26,6 +26,8 @@ class BaseRepository:
         return normalized
 
     def _collection(self):
+        if not current_app.testing:
+            raise RuntimeError("In-memory storage is only available in tests")
         store = current_app.extensions.setdefault("memory_store", {})
         store.setdefault(self.collection_name, [])
         return store[self.collection_name]

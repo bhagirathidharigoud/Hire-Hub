@@ -55,7 +55,7 @@
       <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavigation" aria-controls="mobileNavigation">Menu</button>
       <div class="d-none d-lg-flex align-items-center gap-3">
         <span class="topbar-user">{{ session.get('role', '')|title }}</span>
-        <form method="post" action="{{ url_for('auth.logout') }}"><button class="btn btn-quiet btn-sm" type="submit">Sign out</button></form>
+        <form method="post" action="{{ url_for('auth.logout') }}" data-api-url="{{ url_for('auth_api.logout') }}" data-api-method="POST" data-api-redirect="{{ url_for('auth.login') }}"><button class="btn btn-quiet btn-sm" type="submit">Sign out</button></form>
       </div>
     {% else %}
       <nav class="d-flex align-items-center gap-2" aria-label="Account navigation">
@@ -72,7 +72,7 @@
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">{{ role_navigation() }}
-      <form method="post" action="{{ url_for('auth.logout') }}" class="mt-auto pt-4"><button class="btn btn-outline-secondary w-100" type="submit">Sign out</button></form>
+      <form method="post" action="{{ url_for('auth.logout') }}" data-api-url="{{ url_for('auth_api.logout') }}" data-api-method="POST" data-api-redirect="{{ url_for('auth.login') }}" class="mt-auto pt-4"><button class="btn btn-outline-secondary w-100" type="submit">Sign out</button></form>
     </div>
   </div>
   <div class="workspace">

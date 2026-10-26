@@ -6,7 +6,7 @@
   <h1>Sign in</h1>
   <p>Continue to your workspace.</p>
   {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
-  <form method="post">
+  <form method="post" data-api-url="{{ url_for('auth_api.login') }}" data-api-method="POST" data-api-redirect="{{ url_for('dashboard.index') }}">
     <input type="hidden" name="next" value="{{ next or '' }}">
     <div class="mb-3">
       <label class="form-label" for="email">Email address</label>

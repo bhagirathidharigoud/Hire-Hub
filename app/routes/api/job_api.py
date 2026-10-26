@@ -14,8 +14,9 @@ job_api = Blueprint("job_api", __name__, url_prefix="/api")
 @job_api.route("/jobs", methods=["GET"])
 def list_jobs():
     filters = request.args.to_dict()
-    if "status" not in filters:
-        filters["status"] = "OPEN"
+    filters.pop("status", None)
+    filters.pop("recruiter_id", None)
+    filters["status"] = "OPEN"
     try:
         jobs = JobService().search_jobs(**filters)
     except ValueError as exc:
@@ -28,7 +29,13 @@ def list_jobs():
 @api_role_required("RECRUITER")
 def create_job():
     payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"success": False, "message": "Job details must be a JSON object"}), 400
     payload["recruiter_id"] = session["user_id"]
+    recruiter = UserRepository().find_one({"_id": session["user_id"]}) or {}
+    company = recruiter.get("company_profile") or {}
+    payload["company_id"] = recruiter["_id"]
+    payload["company_name"] = company.get("name", "")
     try:
         job = JobService().create_job(payload)
     except ValueError as exc:
@@ -39,8 +46,46 @@ def create_job():
 
 @job_api.route("/jobs/<job_id>", methods=["GET"])
 def get_job(job_id):
-    job = JobService().get_job_by_id(job_id)
+    try:
+        job = JobService().get_job_by_id(job_id)
+    except JobNotFoundError:
+        return jsonify({"success": False, "message": "Job not found"}), 404
+    if job.get("status") != "OPEN" and not (
+        session.get("role") == "ADMIN"
+        or (
+            session.get("role") == "RECRUITER"
+            and job.get("recruiter_id") == session.get("user_id")
+        )
+    ):
+        return jsonify({"success": False, "message": "Job not found"}), 404
     return jsonify({"success": True, "data": job})
+
+
+@job_api.route("/jobs/<job_id>/status", methods=["PATCH"])
+@api_login_required
+@api_role_required("RECRUITER", "ADMIN")
+def update_job_status(job_id):
+    try:
+        job = JobService().get_job_by_id(job_id)
+    except JobNotFoundError:
+        return jsonify({"success": False, "message": "Job not found"}), 404
+    if session.get("role") == "RECRUITER" and job.get("recruiter_id") != session["user_id"]:
+        return jsonify({"success": False, "message": "You are not authorized to update this job"}), 403
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"success": False, "message": "Job status must be a JSON object"}), 400
+    try:
+        updated = JobService().update_job_status(job_id, payload.get("status"))
+    except ValueError as exc:
+        return jsonify({"success": False, "message": str(exc)}), 400
+    AuditLogService().log_event(
+        "job.status_changed",
+        f"Job {job.get('title')} status changed to {updated['status']}",
+        actor_id=session["user_id"],
+        actor_role=session.get("role"),
+        metadata={"job_id": job_id, "status": updated["status"]},
+    )
+    return jsonify({"success": True, "message": "Job status updated", "data": updated})
 
 
 @job_api.route("/jobs/<job_id>/apply", methods=["POST"])
@@ -49,8 +94,10 @@ def get_job(job_id):
 def apply(job_id):
     try:
         application = JobService().apply_to_job(session["user_id"], job_id)
-    except (DuplicateApplicationError, JobClosedError, JobNotFoundError) as exc:
-        return jsonify({"success": False, "message": exc.message}), 400
+    except JobNotFoundError as exc:
+        return jsonify({"success": False, "message": exc.message}), 404
+    except (DuplicateApplicationError, JobClosedError) as exc:
+        return jsonify({"success": False, "message": exc.message}), 409
     NotificationService().create(session["user_id"], "Your application was submitted successfully.", "SUCCESS")
     job = JobRepository().find_one({"_id": job_id})
     if job and job.get("recruiter_id"):

@@ -1,9 +1,18 @@
 from flask import Blueprint, abort, jsonify, session
 
+from app.repositories.job_repository import JobRepository
 from app.repositories.user_repository import UserRepository
 from app.utils.decorators import api_login_required, api_role_required
 
 recruiter_api = Blueprint("recruiter_api", __name__, url_prefix="/api/recruiters")
+
+
+@recruiter_api.route("/me/jobs", methods=["GET"])
+@api_login_required
+@api_role_required("RECRUITER")
+def list_my_jobs():
+    jobs = JobRepository().find_all({"recruiter_id": session["user_id"]})
+    return jsonify({"success": True, "data": jobs})
 
 
 @recruiter_api.route("/<recruiter_id>", methods=["GET"])

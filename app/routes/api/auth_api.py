@@ -1,5 +1,11 @@
 from flask import Blueprint, jsonify, request, session
 
+from app.exceptions import (
+    InvalidCredentialsError,
+    UserAlreadyExistsError,
+    UserDeactivatedError,
+    UserNotFoundError,
+)
 from app.repositories.user_repository import UserRepository
 from app.services.audit_log_service import AuditLogService
 from app.services.auth_service import AuthService
@@ -13,6 +19,8 @@ def register():
     payload = request.get_json(silent=True) or {}
     try:
         user = AuthService().register_user(payload)
+    except UserAlreadyExistsError as exc:
+        return jsonify({"success": False, "message": exc.message, "error_code": exc.code}), 409
     except ValueError as exc:
         return jsonify({"success": False, "message": str(exc)}), 400
     session["user_id"] = str(user.get("_id"))
@@ -26,7 +34,10 @@ def register():
 @auth_api.route("/login", methods=["POST"])
 def login():
     payload = request.get_json(silent=True) or {}
-    user = AuthService().login_user(payload.get("email"), payload.get("password"))
+    try:
+        user = AuthService().login_user(payload.get("email"), payload.get("password"))
+    except (InvalidCredentialsError, UserNotFoundError, UserDeactivatedError) as exc:
+        return jsonify({"success": False, "message": exc.message, "error_code": exc.code}), 401
     session.clear()
     session["user_id"] = str(user.get("_id"))
     session["role"] = user.get("role")

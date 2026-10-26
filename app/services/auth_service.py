@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.exceptions import InvalidCredentialsError, UserAlreadyExistsError, UserDeactivatedError, UserNotFoundError
 from app.repositories.user_repository import UserRepository
-from app.utils.validators import is_valid_email, is_valid_password
+from app.utils.validators import is_valid_email, is_valid_password, is_valid_phone
 
 
 class AuthService:
@@ -23,13 +23,16 @@ class AuthService:
             raise ValueError("Only candidate and recruiter accounts can be registered")
         if not (payload.get("name") or "").strip():
             raise ValueError("Name is required")
+        phone = (payload.get("phone") or "").strip()
+        if phone and not is_valid_phone(phone):
+            raise ValueError("Invalid phone number")
         if self.user_repository.find_by_email(email):
             raise UserAlreadyExistsError("User already exists")
 
         user = {
             "name": (payload.get("name") or "").strip(),
             "email": email,
-            "phone": payload.get("phone") or "",
+            "phone": phone,
             "password_hash": generate_password_hash(password),
             "role": role,
             "is_active": True,

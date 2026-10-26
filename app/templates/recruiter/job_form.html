@@ -4,7 +4,7 @@
 <header class="page-heading">
   <div><div class="eyebrow">Recruiter workspace</div><h1>Post a job</h1><p>Share the essentials. You can manage applications after publishing.</p></div>
 </header>
-<form method="post" class="card card-body">
+<form method="post" class="card card-body" data-api-url="{{ url_for('job_api.create_job') }}" data-api-method="POST" data-api-redirect="{{ url_for('recruiter.jobs') }}">
   {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
   <div class="form-section">
     <h2 class="form-section-title">1. Job information</h2>

@@ -6,7 +6,7 @@
   <h1>Create your account</h1>
   <p>Choose how you’ll use HireHub, then add your details.</p>
   {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
-  <form method="post">
+  <form method="post" data-api-url="{{ url_for('auth_api.register') }}" data-api-method="POST" data-api-redirect="{{ url_for('dashboard.index') }}">
     <fieldset class="form-section mb-3">
       <legend class="form-section-title">1. Account type</legend>
       <label class="form-label" for="role">I want to</label>

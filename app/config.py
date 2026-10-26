@@ -7,8 +7,8 @@ load_dotenv()
 
 class Config:
     USE_MONGO = True
-    MONGO_REQUIRED = os.getenv("MONGO_REQUIRED", "false").lower() == "true"
-    SECRET_KEY = os.getenv("SECRET_KEY") or "hirehub-dev-secret-key"
+    MONGO_REQUIRED = True
+    SECRET_KEY = os.getenv("SECRET_KEY")
     MONGO_URI = os.getenv("MONGO_URI") or "mongodb://localhost:27017"
     MONGO_DATABASE = os.getenv("MONGO_DATABASE") or "hirehub"
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER") or "app/uploads/resumes"
@@ -28,7 +28,9 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     USE_MONGO = False
+    MONGO_REQUIRED = False
     MONGO_DATABASE = "hirehub_test"
+    SECRET_KEY = "test-only-secret-key"
 
 
 config = {

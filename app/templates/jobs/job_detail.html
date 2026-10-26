@@ -14,7 +14,7 @@
       </div>
     </div>
     {% if job.status == 'OPEN' and session.get('role') == 'CANDIDATE' %}
-      <form method="post" action="{{ url_for('jobs.apply', job_id=job._id) }}">
+      <form method="post" action="{{ url_for('jobs.apply', job_id=job._id) }}" data-api-url="{{ url_for('job_api.apply', job_id=job._id) }}" data-api-method="POST" data-api-redirect="{{ url_for('candidate.applications') }}">
         <button class="btn btn-primary" type="submit">Apply now</button>
       </form>
     {% elif job.status == 'OPEN' and not session.get('user_id') %}

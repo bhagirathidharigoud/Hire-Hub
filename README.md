@@ -26,11 +26,11 @@ The app uses signed Flask session cookies. Set a strong `SECRET_KEY`; production
 - Personalized candidate job recommendations using skills and location
 - Job search and filtering by keyword, location, skill, work mode, and employment type
 - Role-scoped REST API endpoints for auth, jobs, applications, candidates, interviews, notifications, recommendations, and admin data
-- MongoDB persistence using `MONGO_URI` and `MONGO_DATABASE` from `.env`, with in-memory fallback when MongoDB is unavailable
-- Isolated in-memory storage for automated tests
+- MongoDB persistence using `MONGO_URI` and `MONGO_DATABASE` from `.env`; application startup fails if MongoDB is unavailable
+- Isolated in-memory storage is available only to automated tests
 
 ## Notes
 
-Resume uploads accept PDF, DOC, and DOCX files; the default maximum request size is 5 MB and can be changed with `MAX_CONTENT_LENGTH`. The MongoDB repository is used whenever the configured server is reachable; development can fall back to in-memory storage with a warning. Set `MONGO_REQUIRED=true` to fail startup rather than run without MongoDB. Production sets this requirement by default. Resume binary files are stored in the configured protected upload folder, with their metadata stored in MongoDB.
+Resume uploads accept PDF, DOC, and DOCX files; the default maximum request size is 5 MB and can be changed with `MAX_CONTENT_LENGTH`. Resume binary files are stored in the configured protected upload folder, with their metadata stored in MongoDB.
 
-Demo accounts and sample jobs are created only in non-production configurations. Provision production admin users through a trusted deployment process; public registration cannot create admin accounts.
+Configure a reachable MongoDB instance before running the app. The application does not seed users or jobs; create real accounts through registration and provision admin users through a trusted deployment process. Public registration cannot create admin accounts.

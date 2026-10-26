@@ -56,6 +56,10 @@ def seed_demo_data(app):
             "employment_type": "FULL_TIME",
             "skills": ["Python", "Flask", "REST APIs"],
             "status": "OPEN",
+            "salary_min": 80000,
+            "salary_max": 120000,
+            "experience_min": 2,
+            "experience_max": 5,
         },
         {
             "_id": str(uuid4()),
@@ -68,13 +72,15 @@ def seed_demo_data(app):
             "employment_type": "FULL_TIME",
             "skills": ["JavaScript", "Bootstrap", "UI Design"],
             "status": "OPEN",
+            "salary_min": 70000,
+            "salary_max": 110000,
+            "experience_min": 1,
+            "experience_max": 4,
         },
     ]
 
     if mongo_db is not None:
-        existing_user_emails = {
-            user["email"] for user in mongo_db.users.find({}, {"email": 1})
-        }
+        existing_user_emails = {user["email"] for user in mongo_db.users.find({}, {"email": 1})}
         for user in users:
             if user["email"] not in existing_user_emails:
                 mongo_db.users.insert_one(user)
@@ -89,18 +95,6 @@ def seed_demo_data(app):
             job["recruiter_id"] = recruiter_id
             mongo_db.jobs.insert_one(job)
             existing_job_titles.add(job["title"])
-
-        if mongo_db.audit_logs.count_documents({"event_type": "system.bootstrap"}) == 0:
-            mongo_db.audit_logs.insert_one(
-                {
-                    "_id": str(uuid4()),
-                    "event_type": "system.bootstrap",
-                    "message": "HireHub demo data initialized",
-                    "actor_role": "ADMIN",
-                    "metadata": {"user_count": len(users), "job_count": len(jobs)},
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                }
-            )
         return
 
     store = app.extensions.setdefault("memory_store", {})
@@ -121,27 +115,12 @@ def seed_demo_data(app):
         job_store.append(job)
         existing_job_titles.add(job["title"])
 
-    audit_logs = store.setdefault("audit_logs", [])
-    if not any(log.get("event_type") == "system.bootstrap" for log in audit_logs):
-        audit_logs.append(
-            {
-                "_id": str(uuid4()),
-                "event_type": "system.bootstrap",
-                "message": "HireHub demo data initialized",
-                "actor_role": "ADMIN",
-                "metadata": {"user_count": len(users), "job_count": len(jobs)},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            }
-        )
-
 
 def create_app(config_name: str = "default"):
-    if config_name == "production" and not os.getenv("SECRET_KEY"):
-        raise RuntimeError("SECRET_KEY must be configured in production")
+    if config_name != "testing" and not os.getenv("SECRET_KEY"):
+        raise RuntimeError("SECRET_KEY must be configured")
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    if config_name == "production":
-        app.config["MONGO_REQUIRED"] = True
     if config_name == "production" and "SESSION_COOKIE_SECURE" not in os.environ:
         app.config["SESSION_COOKIE_SECURE"] = True
     init_extensions(app)
@@ -159,5 +138,5 @@ def create_app(config_name: str = "default"):
         user = UserRepository().find_one({"_id": user_id})
         if not user or not user.get("is_active", True) or user.get("role") != session.get("role"):
             session.clear()
-    return app
+
     return app

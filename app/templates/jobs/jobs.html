@@ -11,7 +11,7 @@
 </header>
 
 {% if not saved_jobs_page and not recommendations %}
-<form class="search-panel" method="get" action="{{ url_for('jobs.jobs_list') }}">
+<form class="search-panel" method="get" action="{{ url_for('jobs.jobs_list') }}" data-api-search="{{ url_for('job_api.list_jobs') }}">
   <div class="row g-2 align-items-end">
     <div class="col-lg-5">
       <label class="form-label" for="keyword">Job title, skill, or company</label>
@@ -81,17 +81,21 @@
 {% endif %}
 
 {% set result_total = total if total is defined else jobs|length %}
+<section id="job-search-results" aria-live="polite"
+  data-job-detail-url="{{ url_for('jobs.job_detail', job_id='__JOB_ID__') }}"
+  data-saved-job-url="{{ url_for('candidate_api.toggle_saved_job', job_id='__JOB_ID__') }}"
+  data-candidate="{{ 'true' if session.get('role') == 'CANDIDATE' else 'false' }}">
 <div class="results-bar">
   <p class="mb-0"><strong>{{ result_total }}</strong> {{ 'role' if result_total == 1 else 'roles' }}{% if request.args.get('keyword') or request.args.get('location') %} match your search{% endif %}</p>
   {% if not saved_jobs_page and not recommendations %}
   <label class="inline-form mb-0" for="sort">Sort
-    <select id="sort" class="form-select form-select-sm" onchange="this.form.submit()" form="sort-form">
+    <select id="sort" class="form-select form-select-sm" form="sort-form">
       <option value="recent" {% if sort == 'recent' or not sort %}selected{% endif %}>Most recent</option>
       <option value="salary_high" {% if sort == 'salary_high' %}selected{% endif %}>Salary: high to low</option>
       <option value="salary_low" {% if sort == 'salary_low' %}selected{% endif %}>Salary: low to high</option>
     </select>
   </label>
-  <form id="sort-form" method="get" action="{{ url_for('jobs.jobs_list') }}">
+  <form id="sort-form" method="get" action="{{ url_for('jobs.jobs_list') }}" data-api-search="{{ url_for('job_api.list_jobs') }}">
     {% for key, value in request.args.items() if key != 'sort' and key != 'page' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
   </form>
   {% endif %}
@@ -123,7 +127,7 @@
           <div class="job-card-actions">
             <a class="btn btn-primary btn-sm" href="{{ url_for('jobs.job_detail', job_id=job._id) }}">View details</a>
             {% if session.get('role') == 'CANDIDATE' %}
-              <form method="post" action="{{ url_for('candidate.toggle_saved_job', job_id=job._id) }}">
+              <form method="post" action="{{ url_for('candidate.toggle_saved_job', job_id=job._id) }}" data-api-url="{{ url_for('candidate_api.toggle_saved_job', job_id=job._id) }}" data-api-method="PUT">
                 <input type="hidden" name="next" value="{{ request.full_path if request.query_string else request.path }}">
                 <button class="btn btn-outline-primary btn-sm save-button" type="submit">
                   {% if job._id in (saved_job_ids or []) %}Unsave{% else %}Save{% endif %}
@@ -156,4 +160,5 @@
     {% endif %}
   </div>
 {% endif %}
+</section>
 {% endblock %}
